@@ -67,31 +67,31 @@ def compute_airfoil_properties(airfoil_geometry, airfoil_polar_files = None,use_
     Properties Used:
     N/A
     """     
-    Airfoil_Data   = Data()  
-   
+    Airfoil_Data   = Data()
+
     # ----------------------------------------------------------------------------------------
-    # Compute airfoil boundary layers properties 
-    # ----------------------------------------------------------------------------------------   
-    Airfoil_Data   = compute_boundary_layer_properties(airfoil_geometry,Airfoil_Data)
-    num_polars     = len(Airfoil_Data.re_from_polar)
-     
+    # Compute extended cl and cd polars
     # ----------------------------------------------------------------------------------------
-    # Compute extended cl and cd polars 
-    # ----------------------------------------------------------------------------------------    
-    if airfoil_polar_files != None : 
+    if airfoil_polar_files != None :
         # check number of polars per airfoil in batch
-        num_polars   = 0 
+        num_polars   = 0
         n_p = len(airfoil_polar_files)
         if n_p < 3:
-            raise AttributeError('Provide three or more airfoil polars to compute surrogate') 
-        num_polars = max(num_polars, n_p)         
-         
-        # read in polars from files overwrite panel code  
-        airfoil_file_data                          = import_airfoil_polars(airfoil_polar_files)  
+            raise AttributeError('Provide three or more airfoil polars to compute surrogate')
+        num_polars = max(num_polars, n_p)
+
+        # read in polars from files (skip boundary layer panel computation)
+        airfoil_file_data                          = import_airfoil_polars(airfoil_polar_files)
         Airfoil_Data.aoa_from_polar                = airfoil_file_data.aoa_from_polar
-        Airfoil_Data.re_from_polar                 = airfoil_file_data.re_from_polar 
+        Airfoil_Data.re_from_polar                 = airfoil_file_data.re_from_polar
         Airfoil_Data.lift_coefficients             = airfoil_file_data.lift_coefficients
-        Airfoil_Data.drag_coefficients             = airfoil_file_data.drag_coefficients 
+        Airfoil_Data.drag_coefficients             = airfoil_file_data.drag_coefficients
+    else:
+        # ----------------------------------------------------------------------------------------
+        # Compute airfoil boundary layers properties
+        # ----------------------------------------------------------------------------------------
+        Airfoil_Data   = compute_boundary_layer_properties(airfoil_geometry,Airfoil_Data)
+        num_polars     = len(Airfoil_Data.re_from_polar)
         
     # Get all of the coefficients for AERODAS wings
     AoA_sweep_deg         = np.linspace(-14,90,105)

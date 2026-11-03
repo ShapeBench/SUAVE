@@ -15,7 +15,11 @@ from SUAVE.Components.Energy.Energy_Component import Energy_Component
 from SUAVE.Attributes.Solids.Solid import Solid
 from scipy import integrate
 from scipy import interpolate
-from scipy.misc import derivative
+def derivative(func, x0, dx=1.0, n=1, args=(), order=3):
+    from scipy.optimize import approx_fprime
+    if n == 1:
+        return approx_fprime([x0], lambda x: func(x[0], *args), dx)[0]
+    raise NotImplementedError("Only first-order derivatives supported in this shim")
 import numpy as np
 
 # ----------------------------------------------------------------------

@@ -247,6 +247,7 @@ def VLM(conditions,settings,geometry):
     # Build induced velocity matrix, C_mn
     # This is not affected by AoA, so we can use unique mach numbers only
     m_unique, inv = np.unique(mach,return_inverse=True)
+    inv           = inv.ravel()  # numpy>=2.0 returns inv with same shape as input; ravel() ensures 1D indexing
     m_unique      = np.atleast_2d(m_unique).T
     C_mn_small, s, RFLAG_small, EW_small = compute_wing_induced_velocity(VD,m_unique,compute_EW=True)
     
@@ -267,7 +268,9 @@ def VLM(conditions,settings,geometry):
         A = EW
 
     # Compute vortex strength
-    GAMMA  = np.linalg.solve(A,RHS)
+    # numpy>=2.0 gufunc (m,m),(m,n)->(m,n) requires b to be 2D in its core dims;
+    # RHS is (batch, m) so we add a trailing axis, solve, then strip it.
+    GAMMA  = np.linalg.solve(A, RHS[..., np.newaxis])[..., 0]
 
     # ---------------------------------------------------------------------------------------
     # STEP 11: Compute Pressure Coefficient
